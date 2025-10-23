@@ -181,4 +181,43 @@ mod tests {
             test_case_name
         );
     }
+
+    /// Confirm CLI binary works directly
+    #[tokio::test]
+    async fn test_cli() {
+        let test_case_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("test_cases")
+            .join("brief_example");
+        let csv_path = test_case_dir.join("input.csv");
+        let expected_path = test_case_dir.join("expected.csv");
+
+        let output = tokio::process::Command::new("cargo")
+            .args(["run", "--quiet", "--", csv_path.to_str().unwrap()])
+            .output()
+            .await
+            .unwrap();
+
+        assert!(
+            output.status.success(),
+            "{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+
+        let stdout_csv = String::from_utf8_lossy(&output.stdout);
+
+        let mut output_records =
+            output_csv_to_records(std::io::Cursor::new(stdout_csv.as_bytes())).await;
+
+        let expected_file = tokio::fs::File::open(&expected_path)
+            .await
+            .unwrap_or_else(|e| panic!("Failed to open {:?}: {}", expected_path, e));
+        let mut expected_output_records = output_csv_to_records(expected_file).await;
+
+        output_records.sort_by_key(|r| r.client_id());
+        expected_output_records.sort_by_key(|r| r.client_id());
+        assert_eq!(
+            output_records, expected_output_records,
+            "actual != expected for CLI test. CSV output records did not match expected."
+        );
+    }
 }
