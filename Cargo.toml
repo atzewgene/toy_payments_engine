@@ -1,0 +1,19 @@
+[package]
+name = "toy_payments_engine"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85.1"
+
+[dependencies]
+error-stack = "0.6"
+clap = { version = "4", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+thiserror = "2"
+futures = "0.3"
+rust_decimal = "1"
+serde = { version = "1", features = ["derive"] }
+csv-async = { version = "1", features = ["tokio", "with_serde"] } 
+
+[dev-dependencies]
+pretty_assertions = "1"
+rstest = "0.26"

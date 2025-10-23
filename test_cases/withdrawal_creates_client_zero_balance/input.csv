@@ -1,0 +1,2 @@
+type, client, tx, amount
+withdrawal, 5, 1, 10.0
